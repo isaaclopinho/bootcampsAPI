@@ -8,24 +8,35 @@ const {
   getBootcamp,
 } = require("../controllers/bootcamps");
 
-router.get("/", (req, res) => {
-  getBootcamps(req, res);
-});
+router
+    .route("/")
+    .get(getBootcamps)
+    .post(postBootcamp);
 
-router.get("/:id", (req, res) => {
-  getBootcamp(req, res);
-});
+router
+  .route("/:id")
+  .get(getBootcamp)
+  .put(updateBootcamp)
+  .delete(deleteBootcamp);
 
-router.post("/", (req, res) => {
-  postBootcamp(req, res);
-});
+// router.get("/", (req, res) => {
+//   getBootcamps(req, res);
+// });
 
-router.put("/:id", (req, res) => {
-  updateBootcamp(req, res);
-});
+// router.get("/:id", (req, res) => {
+//   getBootcamp(req, res);
+// });
 
-router.delete("/:id", (req, res) => {
-  deleteBootcamp(req, res);
-});
+// router.post("/", (req, res) => {
+//   postBootcamp(req, res);
+// });
+
+// router.put("/:id", (req, res) => {
+//   updateBootcamp(req, res);
+// });
+
+// router.delete("/:id", (req, res) => {
+//   deleteBootcamp(req, res);
+// });
 
 module.exports = router;
