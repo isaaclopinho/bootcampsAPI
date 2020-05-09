@@ -16,9 +16,11 @@ exports.getCourses = asyncHandler(async (req, res, next) => {
   if (req.params.bootcampId) {
     query = Course.find({ bootcamp: req.params.bootcampId });
   } else {
-    query = Course.find().populate({ path: "bootcamp", select: "name description" });
+    query = Course.find().populate({
+      path: "bootcamp",
+      select: "name description",
+    });
   }
-
 
   const courses = await query;
 
@@ -47,9 +49,9 @@ exports.getCourse = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Create a bootcamp
+// @desc    Adds a course to a bootcamp and creates it
 // @route   POST /api/v1/bootcamps/:bootcampId/courses
-// @access  PUBLIC
+// @access  PRIVATE
 exports.addCourse = asyncHandler(async (req, res, next) => {
   req.body.bootcamp = req.params.bootcampId;
 
@@ -68,5 +70,41 @@ exports.addCourse = asyncHandler(async (req, res, next) => {
   res.status(201).json({
     success: true,
     data: course,
+  });
+});
+
+// @desc    Updates a course
+// @route   PUT /api/v1/courses/:id
+// @access  Private
+exports.updateCourse = asyncHandler(async (req, res, next) => {
+  const courses = await Course.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!courses)
+    throw new ErrorResponse(`Course not found with id ${req.params.id}`, 404);
+
+  //201 pra criação de conteudo
+  res.status(201).json({
+    success: true,
+    data: courses,
+  });
+});
+
+// @desc    Delete a course
+// @route   DELETE /api/v1/courses/:id
+// @access  Private
+exports.deleteCourse = asyncHandler(async (req, res, next) => {
+  const courses = await Course.findById(req.params.id);
+
+  if (!courses)
+    throw new ErrorResponse(`Course not found with id ${req.params.id}`, 404);
+
+  courses.remove();
+  //201 pra criação de conteudo
+  res.status(201).json({
+    success: true,
+    data: {},
   });
 });
