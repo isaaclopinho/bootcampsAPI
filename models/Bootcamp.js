@@ -100,6 +100,7 @@ const BootcampSchema = new mongoose.Schema(
       default: Date.now
     }
 }, {
+  id: false,
   toJSON : {virtuals : true},
   toObject : { virtuals : true}
 });

@@ -5,11 +5,11 @@ const errorHandler = (err, req, res, next) => {
     error.message = err.message;
 
     console.log(err.stack.red);
-    
+    console.log(err);
     //console.log(err); to show values
     //Mongoose bad Object ID
     if(err.name === "CastError"){
-        error = new ErrorResponse(`Bootcamp not found with id ${err.value}`, 404);
+        // error = new ErrorResponse(`Bootcamp not found with id ${err.value}`, 404);
     }
 
     //Mongoose duplicate key
