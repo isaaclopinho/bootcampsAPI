@@ -1,8 +1,10 @@
 const express = require('express');
+const path = require('path');
 const dotenv = require('dotenv');
 dotenv.config({path: './config/config.env'});
 const morgan = require('morgan');
 const connectDB = require('./config/db');
+const fileupload = require('express-fileupload');
 const bootcamps = require('./routes/bootcamps');
 const courses = require('./routes/courses');
 const colors = require('colors');
@@ -22,6 +24,10 @@ app.use(express.json());
 if(process.env.NODE_ENV == "development"){
     app.use(morgan('dev'));
 }
+
+
+app.use(fileupload());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Mount routers
 
