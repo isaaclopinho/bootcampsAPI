@@ -10,14 +10,17 @@ const asyncHandler = require("../middlewares/async");
 exports.registerUser = asyncHandler(async (req, res, next) => {
     const {name, email, password, role} = req.body;
 
-    await User.create({
+  const user =  await User.create({
         name,
         email,
         password,
         role
     });
 
+    const token = user.getSignedJwtToken();
+
   res.status(200).json({
-      success : true
+      success : true,
+      token : token
   });
 });
