@@ -10,6 +10,7 @@ const auth = require('./routes/auth');
 const courses = require('./routes/courses');
 const colors = require('colors');
 const handleErrors = require("./middlewares/error");
+const cookie = require('cookie-parser');
 
 
 //Connect to db
@@ -18,16 +19,18 @@ connectDB();
 const app = express();
 
 // Json middleware
-
 app.use(express.json());
+
+
+app.use(cookie());
 
 // Dev logging middleware
 if(process.env.NODE_ENV == "development"){
     app.use(morgan('dev'));
 }
 
-
 app.use(fileupload());
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Mount routers
