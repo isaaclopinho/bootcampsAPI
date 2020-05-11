@@ -31,7 +31,7 @@ exports.loginUser = asyncHandler(async (req, res, next) => {
 
     //Validade email and password
     if(!email || !password){
-        throw new ErrorResponse("Please provide an email and password", 400);
+        return next( new ErrorResponse("Please provide an email and password", 400));
     }
 
     // pq o password nao aparecer por default
@@ -40,19 +40,34 @@ exports.loginUser = asyncHandler(async (req, res, next) => {
     }).select("+password");
 
     if(!user){
-        throw new ErrorResponse("Invalid credentials", 401);
+        return next(new ErrorResponse("Invalid credentials", 401));
     }
 
 
     const isMatch = await user.matchPassword(password);
 
     if(!isMatch){
-        throw new ErrorResponse("Invalid credentials", 401);
+        return next(new ErrorResponse("Invalid credentials", 401));
     }
 
     sendTokenResponse(user, 200, res);
 });
 
+
+
+//@desc     Get logged in user by token
+//@route    GET /api/v1/auth/me
+//@access   Private
+exports.getMe = asyncHandler(async (req, res, next) => {
+    const user = await User.findById(req.user.id);
+
+    console.log(user);
+
+    res.status(200).json({
+      success: true,
+      data: user
+    });
+});
 
 
 // Get token from model, create cookie send response

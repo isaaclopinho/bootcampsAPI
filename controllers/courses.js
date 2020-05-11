@@ -32,7 +32,7 @@ exports.getCourse = asyncHandler(async (req, res, next) => {
   });
 
   if (!courses)
-    throw new ErrorResponse(`Course not found with id ${req.params.id}`, 404);
+    return next(new ErrorResponse(`Course not found with id ${req.params.id}`, 404));
 
   res.status(200).json({
     success: true,
@@ -49,10 +49,10 @@ exports.addCourse = asyncHandler(async (req, res, next) => {
   const bootcamp = await Bootcamp.findById(req.params.bootcampId);
 
   if (!bootcamp) {
-    throw new ErrorResponse(
+    return next(new ErrorResponse(
       `Bootcamp not found with id ${req.params.bootcampId}`,
       404
-    );
+    ));
   }
 
   const course = await Course.create(req.body);
@@ -74,7 +74,7 @@ exports.updateCourse = asyncHandler(async (req, res, next) => {
   });
 
   if (!courses)
-    throw new ErrorResponse(`Course not found with id ${req.params.id}`, 404);
+    return next(new ErrorResponse(`Course not found with id ${req.params.id}`, 404));
 
   //201 pra criação de conteudo
   res.status(201).json({
@@ -90,7 +90,7 @@ exports.deleteCourse = asyncHandler(async (req, res, next) => {
   const courses = await Course.findById(req.params.id);
 
   if (!courses)
-    throw new ErrorResponse(`Course not found with id ${req.params.id}`, 404);
+    return next(new ErrorResponse(`Course not found with id ${req.params.id}`, 404));
 
   courses.remove();
   //201 pra criação de conteudo
