@@ -6,15 +6,29 @@ const geocoder = require("../utils/geocoder");
 // @desc    Get all bootcamps
 // @route   GET /api/v1/bootcamps
 // @access  PUBLIC
-exports.getBootcamps = asyncHandler(async (req, res, next) => { 
+exports.getBootcamps = asyncHandler(async (req, res, next) => {
   res.status(200).json(res.advancedResults);
 });
 
 // @desc    Create a bootcamp
 // @route   POST /api/v1/bootcamps
-// @access  PUBLIC
+// @access  PRIVATE
 exports.postBootcamp = asyncHandler(async (req, res, next) => {
+  req.body.user = req.user.id;
+
+  const publishedBootcamp = await Bootcamp.findOne({ user: req.user.id });
+
+  if (publishedBootcamp && req.user.role !== "admin") {
+    return next(
+      new ErrorResponse(
+        `The user ID ${req.user.id} has already published a bootcamp`,
+        400
+      )
+    );
+  }
+
   const bootcamp = await Bootcamp.create(req.body);
+
   //201 pra criação de conteudo
   res.status(201).json({
     success: true,
@@ -29,7 +43,9 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
   const bootcamp = await Bootcamp.findById(req.params.id);
 
   if (!bootcamp)
-    return next(new ErrorResponse(`Bootcamp not found with id ${req.params.id}`, 404));
+    return next(
+      new ErrorResponse(`Bootcamp not found with id ${req.params.id}`, 404)
+    );
 
   res.status(200).json({
     success: true,
@@ -39,15 +55,25 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
 
 // @desc    Update a bootcamp
 // @route   PUT /api/v1/bootcamps/:id
-// @access  PUBLIC
+// @access  Private
 exports.updateBootcamp = asyncHandler(async (req, res, next) => {
-  const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  let bootcamp = await Bootcamp.findById(req.params.id);
 
   if (!bootcamp)
-    return next(new ErrorResponse(`Bootcamp not found with id ${req.params.id}`, 404));
+    return next(
+      new ErrorResponse(`Bootcamp not found with id ${req.params.id}`, 404)
+    );
+
+
+    if(bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin'){
+      return next(new ErrorResponse(`User ${req.user.id} is not authorized to update this bootcamp`), 401);
+    }
+
+    bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
 
   res.status(200).json({
     success: true,
@@ -57,12 +83,18 @@ exports.updateBootcamp = asyncHandler(async (req, res, next) => {
 
 // @desc    Delete a bootcamps
 // @route   DELETE /api/v1/bootcamps/:id
-// @access  PUBLIC
+// @access  Private
 exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
   const bootcamp = await Bootcamp.findById(req.params.id);
 
   if (!bootcamp)
-    return next(new ErrorResponse(`Bootcamp not found with id ${req.params.id}`, 404));
+    return next(
+      new ErrorResponse(`Bootcamp not found with id ${req.params.id}`, 404)
+    );
+
+    if(bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin'){
+      return next(new ErrorResponse(`User ${req.user.id} is not authorized to delete this bootcamp`), 401);
+    }
 
   bootcamp.remove();
 
@@ -105,7 +137,18 @@ exports.bootcampPhotoUpload = asyncHandler(async (req, res, next) => {
   const bootcamp = await Bootcamp.findById(req.params.id);
 
   if (!bootcamp)
-    return next(new ErrorResponse(`Bootcamp not found with id ${req.params.id}`, 404));
+    return next(
+      new ErrorResponse(`Bootcamp not found with id ${req.params.id}`, 404)
+    );
+
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new ErrorResponse(
+        `User ${req.user.id} is not authorized to update this bootcamp`
+      ),
+      401
+    );
+  }
 
   if (!req.files) {
     return next(new ErrorResponse(`Please upload a file `, 400));
@@ -118,10 +161,12 @@ exports.bootcampPhotoUpload = asyncHandler(async (req, res, next) => {
   }
 
   if (!file.size > process.env.MAX_FILE_UPLOAD) {
-    return next(new ErrorResponse(
-      `Please upload an image less than ${process.env.MAX_FILE_UPLOAD}`,
-      400
-    ));
+    return next(
+      new ErrorResponse(
+        `Please upload an image less than ${process.env.MAX_FILE_UPLOAD}`,
+        400
+      )
+    );
   }
 
   file.name = `photo_${bootcamp._id}${path.parse(file.name).ext}`;

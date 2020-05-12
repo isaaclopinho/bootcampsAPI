@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const colors = require("colors");
 const Bootcamp = require("./models/Bootcamp");
 const Course = require("./models/Course");
+const User = require("./models/User");
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
@@ -24,10 +25,17 @@ const courses = JSON.parse(
   fs.readFileSync(`${__dirname}/data/courses.json`, "utf-8")
 );
 
+//READ JSON FILES
+const users = JSON.parse(
+  fs.readFileSync(`${__dirname}/data/users.json`, "utf-8")
+);
+
+
 const importData = async () => {
   try {
     await Bootcamp.create(bootcamps);
     await Course.create(courses);
+    await User.create(users);
 
     console.log("Data Imported...".green.inverse);
     process.exit();
@@ -40,6 +48,7 @@ const deleteData = async () => {
   try {
     await Bootcamp.deleteMany();
     await Course.deleteMany();
+    await User.deleteMany();
 
     console.log("Data Deleted...".red.inverse);
     process.exit();
