@@ -13,7 +13,9 @@ const courses = require('./routes/courses');
 const colors = require('colors');
 const handleErrors = require("./middlewares/error");
 const cookie = require('cookie-parser');
-
+const sanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const xss = require('xss-clean');
 
 //Connect to db
 connectDB();
@@ -32,6 +34,15 @@ if(process.env.NODE_ENV == "development"){
 }
 
 app.use(fileupload());
+
+//sanitize data
+app.use(sanitize());
+
+//security to headers
+app.use(helmet());
+
+//prevents xss
+app.use(xss());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
