@@ -16,7 +16,9 @@ const cookie = require('cookie-parser');
 const sanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 const xss = require('xss-clean');
-
+const hpp = require('hpp');
+const expressRateLimit = require('express-rate-limit');
+const cors = require('cors');
 //Connect to db
 connectDB();
 
@@ -41,8 +43,22 @@ app.use(sanitize());
 //security to headers
 app.use(helmet());
 
-//prevents xss
+//prevents xss attacks
 app.use(xss());
+
+// rate limit
+const limiter = expressRateLimit({
+    windowMs : 10 * 60 * 1000, //10 min
+    max: 100
+});
+
+app.use(limiter);
+
+// prevent http param polution
+app.use(hpp());
+
+// enable cors
+app.use(cors());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
